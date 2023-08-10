@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/digitalocean/go-workers2/storage"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -80,7 +80,7 @@ func processOptions(options Options) (Options, error) {
 
 	if options.ServerAddr != "" {
 		options.client = redis.NewClient(&redis.Options{
-			IdleTimeout: redisIdleTimeout,
+			ConnMaxIdleTime: redisIdleTimeout,
 			Password:    options.Password,
 			DB:          options.Database,
 			PoolSize:    options.PoolSize,
@@ -93,7 +93,7 @@ func processOptions(options Options) (Options, error) {
 		}
 
 		options.client = redis.NewFailoverClient(&redis.FailoverOptions{
-			IdleTimeout:   redisIdleTimeout,
+			ConnMaxIdleTime:   redisIdleTimeout,
 			Password:      options.Password,
 			DB:            options.Database,
 			PoolSize:      options.PoolSize,

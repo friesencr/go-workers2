@@ -97,9 +97,9 @@ func TestWorker(t *testing.T) {
 	w := newWorker(testLogger, "q", 2, cc.F)
 
 	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
-		w.start(df)
+		w.start(&df)
 		wg.Done()
 	}()
 
@@ -189,10 +189,17 @@ func TestWorkerProcessesAndAcksMessages(t *testing.T) {
 	w := newWorker(testLogger, "q", 1, cc.F)
 
 	var wg sync.WaitGroup
-
+	wg.Add(1)
 	go func() {
+<<<<<<< HEAD
 		wg.Add(1)
 		w.start(df)
+||||||| parent of 69d6cdd (Merge pull request #88 from digitalocean/snegrea/fix_workgroup)
+		wg.Add(1)
+		w.start(&df)
+=======
+		w.start(&df)
+>>>>>>> 69d6cdd (Merge pull request #88 from digitalocean/snegrea/fix_workgroup)
 		wg.Done()
 	}()
 

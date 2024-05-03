@@ -23,21 +23,21 @@ type dummyFetcher struct {
 	closed          func() bool
 }
 
-func (d dummyFetcher) Queue() string           { return d.queue() }
-func (d dummyFetcher) InProgressQueue() string { return d.inProgressQueue() }
-func (d dummyFetcher) Fetch()                  { d.fetch() }
-func (d dummyFetcher) Acknowledge(m *Msg)      { d.acknowledge(m) }
-func (d dummyFetcher) Ready() chan bool        { return d.ready() }
-func (d dummyFetcher) Messages() chan *Msg     { return d.messages() }
-func (d dummyFetcher) Close()                  { d.close() }
-func (d dummyFetcher) Closed() bool            { return d.closed() }
+func (d *dummyFetcher) Queue() string           { return d.queue() }
+func (d *dummyFetcher) InProgressQueue() string { return d.inProgressQueue() }
+func (d *dummyFetcher) Fetch()                  { d.fetch() }
+func (d *dummyFetcher) Acknowledge(m *Msg)      { d.acknowledge(m) }
+func (d *dummyFetcher) Ready() chan bool        { return d.ready() }
+func (d *dummyFetcher) Messages() chan *Msg     { return d.messages() }
+func (d *dummyFetcher) Close()                  { d.close() }
+func (d *dummyFetcher) Closed() bool            { return d.closed() }
 
-func (d dummyFetcher) SetActive(active bool) {
+func (d *dummyFetcher) SetActive(active bool) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	d.isActive = active
 }
-func (d dummyFetcher) IsActive() bool {
+func (d *dummyFetcher) IsActive() bool {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	return d.isActive
@@ -120,7 +120,7 @@ func TestWorker(t *testing.T) {
 	assert.Equal(t, w.inProgressQueue, df.InProgressQueue())
 
 	t.Run("cannot start while running", func(t *testing.T) {
-		w.start(df)
+		w.start(&df)
 		// This test would time out if w.start doesn't return immediately
 	})
 
@@ -193,6 +193,7 @@ func TestWorkerProcessesAndAcksMessages(t *testing.T) {
 	go func() {
 <<<<<<< HEAD
 		wg.Add(1)
+<<<<<<< HEAD
 		w.start(df)
 ||||||| parent of 69d6cdd (Merge pull request #88 from digitalocean/snegrea/fix_workgroup)
 		wg.Add(1)
@@ -200,6 +201,11 @@ func TestWorkerProcessesAndAcksMessages(t *testing.T) {
 =======
 		w.start(&df)
 >>>>>>> 69d6cdd (Merge pull request #88 from digitalocean/snegrea/fix_workgroup)
+||||||| parent of c0c54a4 (Fix general warnings golang warnings.)
+		w.start(df)
+=======
+		w.start(&df)
+>>>>>>> c0c54a4 (Fix general warnings golang warnings.)
 		wg.Done()
 	}()
 

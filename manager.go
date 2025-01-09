@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/digitalocean/go-workers2/storage"
+	"github.com/friesencr/go-workers2/storage"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )

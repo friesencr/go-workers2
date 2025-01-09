@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/digitalocean/go-workers2.png)](https://travis-ci.org/digitalocean/go-workers2)
-[![GoDoc](https://godoc.org/github.com/digitalocean/go-workers2?status.png)](https://godoc.org/github.com/digitalocean/go-workers2)
+[![GoDoc](https://godoc.org/github.com/friesencr/go-workers2?status.png)](https://godoc.org/github.com/friesencr/go-workers2)
 
 [Sidekiq](http://sidekiq.org/) compatible
 background workers in [golang](http://golang.org/).
@@ -21,7 +21,7 @@ package main
 import (
   "fmt"
 
-  workers "github.com/digitalocean/go-workers2"
+  workers "github.com/friesencr/go-workers2"
 )
 
 func myJob(message *workers.Msg) error {

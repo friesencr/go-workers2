@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/digitalocean/go-workers2/storage"
+	"github.com/friesencr/go-workers2/storage"
 )
 
 type HeartbeatInfo struct {

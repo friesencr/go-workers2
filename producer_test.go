@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/digitalocean/go-workers2/storage"
+	"github.com/friesencr/go-workers2/storage"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 )
@@ -180,9 +180,9 @@ func TestNewProducerWithRedisClient(t *testing.T) {
 
 	client := redis.NewClient(&redis.Options{
 		ConnMaxIdleTime: 1,
-		Password:    "ab",
-		DB:          2,
-		TLSConfig:   &tls.Config{ServerName: "test_tls3"},
+		Password:        "ab",
+		DB:              2,
+		TLSConfig:       &tls.Config{ServerName: "test_tls3"},
 	})
 
 	producer, err := NewProducerWithRedisClient(opts, client)
@@ -203,9 +203,9 @@ func TestNewProducerWithRedisClientNoProcessID(t *testing.T) {
 
 	client := redis.NewClient(&redis.Options{
 		ConnMaxIdleTime: 1,
-		Password:    "ab",
-		DB:          2,
-		TLSConfig:   &tls.Config{ServerName: "test_tls2"},
+		Password:        "ab",
+		DB:              2,
+		TLSConfig:       &tls.Config{ServerName: "test_tls2"},
 	})
 
 	mgr, err := NewProducerWithRedisClient(opts, client)

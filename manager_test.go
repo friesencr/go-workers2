@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/digitalocean/go-workers2/storage"
+	"github.com/friesencr/go-workers2/storage"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 )
@@ -39,9 +39,9 @@ func TestNewManagerWithRedisClient(t *testing.T) {
 
 	client := redis.NewClient(&redis.Options{
 		ConnMaxIdleTime: 1,
-		Password:    "ab",
-		DB:          2,
-		TLSConfig:   &tls.Config{ServerName: "test_tls2"},
+		Password:        "ab",
+		DB:              2,
+		TLSConfig:       &tls.Config{ServerName: "test_tls2"},
 	})
 
 	mgr, err := NewManagerWithRedisClient(opts, client)
@@ -63,9 +63,9 @@ func TestNewManagerWithRedisClientNoProcessID(t *testing.T) {
 
 	client := redis.NewClient(&redis.Options{
 		ConnMaxIdleTime: 1,
-		Password:    "ab",
-		DB:          2,
-		TLSConfig:   &tls.Config{ServerName: "test_tls2"},
+		Password:        "ab",
+		DB:              2,
+		TLSConfig:       &tls.Config{ServerName: "test_tls2"},
 	})
 
 	mgr, err := NewManagerWithRedisClient(opts, client)

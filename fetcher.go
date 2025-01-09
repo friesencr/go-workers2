@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/digitalocean/go-workers2/storage"
+	"github.com/friesencr/go-workers2/storage"
 )
 
-//Fetcher is an interface for managing work messages
+// Fetcher is an interface for managing work messages
 type Fetcher interface {
 	Queue() string
 	InProgressQueue() string

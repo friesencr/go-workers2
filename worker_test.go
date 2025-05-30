@@ -191,21 +191,7 @@ func TestWorkerProcessesAndAcksMessages(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-<<<<<<< HEAD
-		wg.Add(1)
-<<<<<<< HEAD
-		w.start(df)
-||||||| parent of 69d6cdd (Merge pull request #88 from digitalocean/snegrea/fix_workgroup)
-		wg.Add(1)
 		w.start(&df)
-=======
-		w.start(&df)
->>>>>>> 69d6cdd (Merge pull request #88 from digitalocean/snegrea/fix_workgroup)
-||||||| parent of c0c54a4 (Fix general warnings golang warnings.)
-		w.start(df)
-=======
-		w.start(&df)
->>>>>>> c0c54a4 (Fix general warnings golang warnings.)
 		wg.Done()
 	}()
 

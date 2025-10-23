@@ -25,6 +25,7 @@ type Options struct {
 	PollInterval time.Duration
 	Database     int
 	Password     string
+	Username     string
 	PoolSize     int
 
 	// Provide one of ServerAddr or (SentinelAddrs + RedisMasterName)
@@ -82,6 +83,7 @@ func processOptions(options Options) (Options, error) {
 		options.client = redis.NewClient(&redis.Options{
 			ConnMaxIdleTime: redisIdleTimeout,
 			Password:        options.Password,
+			Username:        options.Username,
 			DB:              options.Database,
 			PoolSize:        options.PoolSize,
 			Addr:            options.ServerAddr,
@@ -95,6 +97,7 @@ func processOptions(options Options) (Options, error) {
 		options.client = redis.NewFailoverClient(&redis.FailoverOptions{
 			ConnMaxIdleTime: redisIdleTimeout,
 			Password:        options.Password,
+			Username:        options.Username,
 			DB:              options.Database,
 			PoolSize:        options.PoolSize,
 			SentinelAddrs:   strings.Split(options.SentinelAddrs, ","),

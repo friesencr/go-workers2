@@ -131,7 +131,7 @@ func processOptionsWithRedisClient(options Options, client *redis.Client) (Optio
 	}
 
 	if client == nil {
-		return Options{}, errors.New("Redis client is nil; Redis client is not configured")
+		return Options{}, errors.New("redis client is nil; Redis client is not configured")
 	}
 
 	options.client = client
@@ -148,7 +148,7 @@ func processOptionsWithRedisClient(options Options, client *redis.Client) (Optio
 
 func validateGeneralOptions(options Options) (Options, error) {
 	if options.ProcessID == "" {
-		return Options{}, errors.New("Options requires a ProcessID, which uniquely identifies this instance")
+		return Options{}, errors.New("options requires a ProcessID, which uniquely identifies this instance")
 	}
 
 	if options.Namespace != "" {
@@ -157,6 +157,11 @@ func validateGeneralOptions(options Options) (Options, error) {
 
 	if options.PollInterval <= 0 {
 		options.PollInterval = 15 * time.Second
+	}
+
+	if options.Heartbeat != nil &&
+		options.Heartbeat.Interval >= options.Heartbeat.HeartbeatTTL {
+		return Options{}, errors.New("invalid heartbeat configuration, heartbeat interval longer than or equal to heartbeat tll")
 	}
 
 	return options, nil

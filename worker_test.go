@@ -23,21 +23,21 @@ type dummyFetcher struct {
 	closed          func() bool
 }
 
-func (d dummyFetcher) Queue() string           { return d.queue() }
-func (d dummyFetcher) InProgressQueue() string { return d.inProgressQueue() }
-func (d dummyFetcher) Fetch()                  { d.fetch() }
-func (d dummyFetcher) Acknowledge(m *Msg)      { d.acknowledge(m) }
-func (d dummyFetcher) Ready() chan bool        { return d.ready() }
-func (d dummyFetcher) Messages() chan *Msg     { return d.messages() }
-func (d dummyFetcher) Close()                  { d.close() }
-func (d dummyFetcher) Closed() bool            { return d.closed() }
+func (d *dummyFetcher) Queue() string           { return d.queue() }
+func (d *dummyFetcher) InProgressQueue() string { return d.inProgressQueue() }
+func (d *dummyFetcher) Fetch()                  { d.fetch() }
+func (d *dummyFetcher) Acknowledge(m *Msg)      { d.acknowledge(m) }
+func (d *dummyFetcher) Ready() chan bool        { return d.ready() }
+func (d *dummyFetcher) Messages() chan *Msg     { return d.messages() }
+func (d *dummyFetcher) Close()                  { d.close() }
+func (d *dummyFetcher) Closed() bool            { return d.closed() }
 
-func (d dummyFetcher) SetActive(active bool) {
+func (d *dummyFetcher) SetActive(active bool) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	d.isActive = active
 }
-func (d dummyFetcher) IsActive() bool {
+func (d *dummyFetcher) IsActive() bool {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	return d.isActive
@@ -97,9 +97,9 @@ func TestWorker(t *testing.T) {
 	w := newWorker(testLogger, "q", 2, cc.F)
 
 	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
-		w.start(df)
+		w.start(&df)
 		wg.Done()
 	}()
 
@@ -120,7 +120,7 @@ func TestWorker(t *testing.T) {
 	assert.Equal(t, w.inProgressQueue, df.InProgressQueue())
 
 	t.Run("cannot start while running", func(t *testing.T) {
-		w.start(df)
+		w.start(&df)
 		// This test would time out if w.start doesn't return immediately
 	})
 
@@ -189,10 +189,9 @@ func TestWorkerProcessesAndAcksMessages(t *testing.T) {
 	w := newWorker(testLogger, "q", 1, cc.F)
 
 	var wg sync.WaitGroup
-
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
-		w.start(df)
+		w.start(&df)
 		wg.Done()
 	}()
 

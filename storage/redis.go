@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"strconv"
 	"time"
 
@@ -15,14 +15,14 @@ type redisStore struct {
 	namespace string
 
 	client *redis.Client
-	logger *log.Logger
+	logger *slog.Logger
 }
 
 // Compile-time check to ensure that Redis store does in fact implement the Store interface
 var _ Store = &redisStore{}
 
 // NewRedisStore returns a new Redis store with the given namespace and preconfigured client
-func NewRedisStore(namespace string, client *redis.Client, logger *log.Logger) Store {
+func NewRedisStore(namespace string, client *redis.Client, logger *slog.Logger) Store {
 	return &redisStore{
 		namespace: namespace,
 		client:    client,
@@ -37,7 +37,7 @@ func (r *redisStore) DequeueMessage(ctx context.Context, queue string, inprogres
 		// If redis returns null, the queue is empty.
 		// Just ignore empty queue errors; print all other errors.
 		if err != redis.Nil {
-			r.logger.Println("ERR: ", queue, err)
+			r.logger.Error("dequeue failed", "queue", queue, "error", err)
 		} else {
 			err = NoMessage
 		}
@@ -181,6 +181,11 @@ func (r *redisStore) RequeueMessagesFromInProgressQueue(ctx context.Context, inp
 			if err == redis.Nil {
 				break
 			}
+			r.logger.Error("requeue in-progress failed",
+				"queue", queue,
+				"inprogress_queue", inprogressQueue,
+				"error", err,
+			)
 			return requeuedMsgs, err
 		}
 		requeuedMsgs = append(requeuedMsgs, msg)

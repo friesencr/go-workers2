@@ -13,7 +13,7 @@ func (s *apiServer) Stats(w http.ResponseWriter, req *http.Request) {
 	for _, m := range s.managers {
 		stats, err := m.GetStats()
 		if err != nil {
-			s.logger.Println("couldn't retrieve stats for manager:", err)
+			s.logger.Error("couldn't retrieve stats for manager", "error", err)
 		} else {
 			allStats = append(allStats, stats)
 		}

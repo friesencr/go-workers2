@@ -3,8 +3,7 @@ package workers
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -37,15 +36,10 @@ type simpleFetcher struct {
 	stop     chan bool
 	exit     chan bool
 	closed   chan bool
-	logger   *log.Logger
+	logger   *slog.Logger
 }
 
 func newSimpleFetcher(queue string, opts Options, isActive bool) *simpleFetcher {
-	logger := opts.Logger
-	if logger == nil {
-		logger = log.New(os.Stdout, "go-workers2: ", log.Ldate|log.Lmicroseconds)
-	}
-
 	return &simpleFetcher{
 		store:     opts.store,
 		processID: opts.ProcessID,
@@ -56,7 +50,7 @@ func newSimpleFetcher(queue string, opts Options, isActive bool) *simpleFetcher 
 		stop:      make(chan bool),
 		exit:      make(chan bool),
 		closed:    make(chan bool),
-		logger:    logger,
+		logger:    opts.Logger,
 	}
 }
 
@@ -115,7 +109,7 @@ func (f *simpleFetcher) tryFetchMessage() {
 		// If redis returns null, the queue is empty.
 		// Just ignore empty queue errors; print all other errors.
 		if err != storage.NoMessage {
-			f.logger.Println("ERR: ", f.queue, err)
+			f.logger.Error("dequeue failed", "queue", f.queue, "error", err)
 		}
 	} else {
 		f.sendMessage(message)
@@ -126,7 +120,7 @@ func (f *simpleFetcher) sendMessage(message string) {
 	msg, err := NewMsg(message)
 
 	if err != nil {
-		f.logger.Println("ERR: Couldn't create message from", message, ":", err)
+		f.logger.Error("create message failed", "message", message, "error", err)
 		return
 	}
 
@@ -134,7 +128,10 @@ func (f *simpleFetcher) sendMessage(message string) {
 }
 
 func (f *simpleFetcher) Acknowledge(message *Msg) {
-	f.store.AcknowledgeMessage(context.Background(), f.InProgressQueue(), message.OriginalJson())
+	err := f.store.AcknowledgeMessage(context.Background(), f.InProgressQueue(), message.OriginalJson())
+	if err != nil {
+		f.logger.Error("acknowledge failed", "queue", f.queue, "error", err)
+	}
 }
 
 func (f *simpleFetcher) Messages() chan *Msg {
@@ -174,7 +171,7 @@ func (f *simpleFetcher) Closed() bool {
 func (f *simpleFetcher) inprogressMessages() []string {
 	messages, err := f.store.ListMessages(context.Background(), f.InProgressQueue())
 	if err != nil {
-		f.logger.Println("ERR: ", err)
+		f.logger.Error("list in-progress messages failed", "error", err)
 	}
 
 	return messages

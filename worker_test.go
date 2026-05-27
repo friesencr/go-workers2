@@ -1,7 +1,7 @@
 package workers
 
 import (
-	"log"
+	"log/slog"
 	"os"
 	"sync"
 	"testing"
@@ -44,7 +44,7 @@ func (d *dummyFetcher) IsActive() bool {
 }
 
 func TestNewWorker(t *testing.T) {
-	testLogger := log.New(os.Stdout, "test-go-workers2: ", log.Ldate|log.Lmicroseconds)
+	testLogger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	cc := NewCallCounter()
 	w := newWorker(testLogger, "q", 0, cc.F)
@@ -64,7 +64,7 @@ func TestNewWorker(t *testing.T) {
 }
 
 func TestWorker(t *testing.T) {
-	testLogger := log.New(os.Stdout, "test-go-workers2: ", log.Ldate|log.Lmicroseconds)
+	testLogger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	readyCh := make(chan bool)
 	msgCh := make(chan *Msg)
@@ -161,7 +161,7 @@ func TestWorker(t *testing.T) {
 }
 
 func TestWorkerProcessesAndAcksMessages(t *testing.T) {
-	testLogger := log.New(os.Stdout, "test-go-workers2: ", log.Ldate|log.Lmicroseconds)
+	testLogger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	readyCh := make(chan bool)
 	msgCh := make(chan *Msg)
 	ackCh := make(chan *Msg)

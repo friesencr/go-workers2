@@ -2,7 +2,7 @@ package workers
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 	"os"
 	"sync"
 	"testing"
@@ -11,7 +11,7 @@ import (
 )
 
 func TestTaskRunner_process(t *testing.T) {
-	testLogger := log.New(os.Stdout, "test-go-workers2: ", log.Ldate|log.Lmicroseconds)
+	testLogger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	msg, _ := NewMsg(`{}`)
 
@@ -53,7 +53,7 @@ func TestTaskRunner(t *testing.T) {
 		return m
 	}
 
-	tr := newTaskRunner(Logger, func(m *Msg) error {
+	tr := newTaskRunner(slog.Default(), func(m *Msg) error {
 		if m.Get("sync").MustBool() {
 			syncCh <- true
 			<-syncCh

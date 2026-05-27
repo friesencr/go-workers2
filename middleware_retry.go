@@ -40,6 +40,7 @@ func retryProcessError(queue string, mgr *Manager, message *Msg, err error) erro
 		// then we shouldn't acknowledge the job, otherwise
 		// it'll disappear into the void.
 		if err != nil {
+			mgr.logger.Error("retry enqueue failed", "queue", queue, "jid", message.Jid(), "error", err)
 			message.ack = false
 		}
 	} else {

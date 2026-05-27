@@ -2,7 +2,7 @@ package workers
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"runtime"
 	"time"
 )
@@ -13,8 +13,8 @@ func LogMiddleware(queue string, mgr *Manager, next JobFunc) JobFunc {
 		prefix := fmt.Sprint(queue, " JID-", message.Jid())
 
 		start := time.Now()
-		mgr.logger.Println(prefix, "start")
-		mgr.logger.Println(prefix, "args:", message.Args().ToJson())
+		mgr.logger.Info("job start", "prefix", prefix)
+		mgr.logger.Debug("job args", "prefix", prefix, "args", message.Args().ToJson())
 
 		defer func() {
 			if e := recover(); e != nil {
@@ -34,7 +34,7 @@ func LogMiddleware(queue string, mgr *Manager, next JobFunc) JobFunc {
 		if err != nil {
 			logProcessError(mgr.logger, prefix, start, err)
 		} else {
-			mgr.logger.Println(prefix, "done:", time.Since(start))
+			mgr.logger.Info("job done", "prefix", prefix, "duration", time.Since(start))
 		}
 
 		return
@@ -42,10 +42,13 @@ func LogMiddleware(queue string, mgr *Manager, next JobFunc) JobFunc {
 
 }
 
-func logProcessError(logger *log.Logger, prefix string, start time.Time, err error) {
-	logger.Println(prefix, "fail:", time.Since(start))
-
+func logProcessError(logger *slog.Logger, prefix string, start time.Time, err error) {
 	buf := make([]byte, 4096)
 	buf = buf[:runtime.Stack(buf, false)]
-	logger.Printf("%s error: %v\n%s", prefix, err, buf)
+	logger.Error("job fail",
+		"prefix", prefix,
+		"duration", time.Since(start),
+		"error", err,
+		"stack", string(buf),
+	)
 }

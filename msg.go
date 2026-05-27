@@ -1,8 +1,7 @@
 package workers
 
 import (
-	"log"
-	"os"
+	"log/slog"
 	"reflect"
 
 	"github.com/bitly/go-simplejson"
@@ -10,7 +9,7 @@ import (
 
 // Logger is the default go-workers2 logger, only used here in this file.
 // TODO: remove this
-var Logger = log.New(os.Stdout, "go-workers2: ", log.Ldate|log.Lmicroseconds)
+var Logger = slog.Default()
 
 type data struct {
 	*simplejson.Json
@@ -59,7 +58,7 @@ func (d *data) ToJson() string {
 	json, err := d.Encode()
 
 	if err != nil {
-		Logger.Println("ERR: Couldn't generate json from", d, ":", err)
+		Logger.Error("generate json failed", "error", err)
 	}
 
 	return string(json)

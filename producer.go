@@ -108,16 +108,21 @@ func (p *Producer) EnqueueWithContext(ctx context.Context, queue, class string, 
 
 	if now < opts.At {
 		err = p.opts.store.EnqueueScheduledMessage(ctx, data.At, string(bytes))
+		if err != nil {
+			p.opts.Logger.Error("enqueue scheduled failed", "queue", queue, "class", class, "error", err)
+		}
 		return data.Jid, err
 	}
 
 	err = p.opts.store.CreateQueue(ctx, queue)
 	if err != nil {
+		p.opts.Logger.Error("create queue failed", "queue", queue, "error", err)
 		return "", err
 	}
 
 	err = p.opts.store.EnqueueMessageNow(ctx, queue, string(bytes))
 	if err != nil {
+		p.opts.Logger.Error("enqueue failed", "queue", queue, "class", class, "error", err)
 		return "", err
 	}
 

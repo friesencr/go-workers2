@@ -2,7 +2,7 @@ package workers
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"os"
 	"sort"
 	"sync"
@@ -24,7 +24,7 @@ type Manager struct {
 	running          bool
 	stop             chan bool
 	active           bool
-	logger           *log.Logger
+	logger           *slog.Logger
 	startedAt        time.Time
 	processNonce     string
 	heartbeatChannel chan bool
@@ -318,24 +318,24 @@ func (m *Manager) startHeartbeat() error {
 		case <-heartbeatTicker.C:
 			heartbeatTime, err := m.opts.store.GetTime(context.Background())
 			if err != nil {
-				m.logger.Println("ERR: Failed to get heartbeat time", err)
+				m.logger.Error("failed to get heartbeat time", "error", err)
 				return err
 			}
 			heartbeat, err := m.sendHeartbeat(heartbeatTime)
 			if err != nil {
-				m.logger.Println("ERR: Failed to send heartbeat", err)
+				m.logger.Error("failed to send heartbeat", "error", err)
 				return err
 			}
 			expireTS := heartbeatTime.Add(-m.opts.Heartbeat.HeartbeatTTL).Unix()
 			staleMessageUpdates, err := m.handleAllExpiredHeartbeats(context.Background(), expireTS)
 			if err != nil {
-				m.logger.Println("ERR: error expiring heartbeat identities", err)
+				m.logger.Error("error expiring heartbeat identities", "error", err)
 				return err
 			}
 			for _, afterHeartbeatHook := range m.afterHeartbeatHooks {
 				err := afterHeartbeatHook(heartbeat, m, staleMessageUpdates)
 				if err != nil {
-					m.logger.Println("ERR: Failed to execute after heartbeat hook", err)
+					m.logger.Error("failed to execute after heartbeat hook", "error", err)
 					return err
 				}
 			}
@@ -348,6 +348,7 @@ func (m *Manager) startHeartbeat() error {
 func (m *Manager) handleAllExpiredHeartbeats(ctx context.Context, expireTS int64) ([]*staleMessageUpdate, error) {
 	heartbeats, err := m.opts.store.GetAllHeartbeats(ctx)
 	if err != nil && err != redis.Nil {
+		m.logger.Error("get all heartbeats failed", "error", err)
 		return nil, err
 	}
 
@@ -366,6 +367,11 @@ func (m *Manager) handleAllExpiredHeartbeats(ctx context.Context, expireTS int64
 			}
 			requeuedMsgs, err = m.opts.store.RequeueMessagesFromInProgressQueue(ctx, workerHeartbeat.InProgressQueue, workerHeartbeat.Queue)
 			if err != nil {
+				m.logger.Error("requeue in-progress messages failed",
+					"queue", workerHeartbeat.Queue,
+					"inprogress_queue", workerHeartbeat.InProgressQueue,
+					"error", err,
+				)
 				return nil, err
 			}
 			requeuedInProgressQueues[workerHeartbeat.InProgressQueue] = true
@@ -381,6 +387,7 @@ func (m *Manager) handleAllExpiredHeartbeats(ctx context.Context, expireTS int64
 		}
 		err = m.opts.store.RemoveHeartbeat(ctx, heartbeat.Identity)
 		if err != nil {
+			m.logger.Error("remove heartbeat failed", "identity", heartbeat.Identity, "error", err)
 			return nil, err
 		}
 
@@ -429,6 +436,7 @@ func activateManagerByPriority(heartbeat *storage.Heartbeat, manager *Manager, s
 	ctx := context.Background()
 	heartbeats, err := manager.opts.store.GetAllHeartbeats(ctx)
 	if err != nil {
+		manager.logger.Error("get all heartbeats failed", "error", err)
 		return err
 	}
 	if len(heartbeats) == 0 {

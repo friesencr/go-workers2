@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
+	"log/slog"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -24,7 +24,7 @@ func TestRetries_Empty(t *testing.T) {
 
 func TestRetries_NotEmpty(t *testing.T) {
 	a := &apiServer{
-		logger: log.New(os.Stdout, "go-workers2: ", log.Ldate|log.Lmicroseconds),
+		logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
 	}
 
 	// test API replies without registered workers

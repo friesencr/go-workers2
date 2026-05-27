@@ -1,7 +1,7 @@
 package workers
 
 import (
-	"log"
+	"log/slog"
 	"sync"
 )
 
@@ -15,10 +15,10 @@ type worker struct {
 	stop            chan bool
 	running         bool
 	fetcher         Fetcher
-	logger          *log.Logger
+	logger          *slog.Logger
 }
 
-func newWorker(logger *log.Logger, queue string, concurrency int, handler JobFunc) *worker {
+func newWorker(logger *slog.Logger, queue string, concurrency int, handler JobFunc) *worker {
 	if concurrency <= 0 {
 		concurrency = 1
 	}

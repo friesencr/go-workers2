@@ -3,8 +3,7 @@ package workers
 import (
 	"crypto/tls"
 	"errors"
-	"log"
-	"os"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -42,7 +41,7 @@ type Options struct {
 	Heartbeat *HeartbeatOptions
 
 	// Log
-	Logger *log.Logger
+	Logger *slog.Logger
 
 	client *redis.Client
 	store  storage.Store
@@ -109,7 +108,7 @@ func processOptions(options Options) (Options, error) {
 	}
 
 	if options.Logger == nil {
-		options.Logger = log.New(os.Stdout, "go-workers2: ", log.Ldate|log.Lmicroseconds)
+		options.Logger = slog.Default()
 	}
 
 	redisStore := storage.NewRedisStore(options.Namespace, options.client, options.Logger)
@@ -140,7 +139,7 @@ func processOptionsWithRedisClient(options Options, client *redis.Client) (Optio
 	options.client = client
 
 	if options.Logger == nil {
-		options.Logger = log.New(os.Stdout, "go-workers2: ", log.Ldate|log.Lmicroseconds)
+		options.Logger = slog.Default()
 	}
 
 	redisStore := storage.NewRedisStore(options.Namespace, options.client, options.Logger)

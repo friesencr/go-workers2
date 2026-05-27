@@ -3,22 +3,21 @@ package workers
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
-	"os"
 	"sync"
 )
 
 // APIOptions contains the set of configuration options for the global api
 type APIOptions struct {
-	Logger *log.Logger
+	Logger *slog.Logger
 	Mux    *http.ServeMux
 }
 
 type apiServer struct {
 	lock     sync.Mutex
 	managers map[string]*Manager
-	logger   *log.Logger
+	logger   *slog.Logger
 	mux      *http.ServeMux
 }
 
@@ -41,7 +40,7 @@ var globalHTTPServer *http.Server
 
 var globalAPIServer = &apiServer{
 	managers: map[string]*Manager{},
-	logger:   log.New(os.Stdout, "go-workers2: ", log.Ldate|log.Lmicroseconds),
+	logger:   slog.Default(),
 	mux:      http.NewServeMux(),
 }
 
@@ -66,11 +65,11 @@ func RegisterAPIEndpoints(mux *http.ServeMux) {
 func StartAPIServer(port int) {
 	RegisterAPIEndpoints(globalAPIServer.mux)
 
-	globalAPIServer.logger.Println("APIs are available at", fmt.Sprintf("http://localhost:%v/", port))
+	globalAPIServer.logger.Info("APIs are available", "url", fmt.Sprintf("http://localhost:%v/", port))
 
 	globalHTTPServer = &http.Server{Addr: fmt.Sprint(":", port), Handler: globalAPIServer.mux}
 	if err := globalHTTPServer.ListenAndServe(); err != nil {
-		globalAPIServer.logger.Println(err)
+		globalAPIServer.logger.Error("API server failed", "error", err)
 	}
 }
 

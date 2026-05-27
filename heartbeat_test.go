@@ -2,7 +2,7 @@ package workers
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"os"
 	"testing"
 	"time"
@@ -55,7 +55,7 @@ func TestBuildHeartbeatWorkerMessage(t *testing.T) {
 	msg, err := NewMsg("{\"class\":\"MyWorker\",\"jid\":\"jid-123\"}")
 	assert.NoError(t, err)
 
-	testLogger := log.New(os.Stdout, "test-go-workers2: ", log.Ldate|log.Lmicroseconds)
+	testLogger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	tr := newTaskRunner(testLogger, func(m *Msg) error {
 		return nil
